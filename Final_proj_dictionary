@@ -1,0 +1,59 @@
+File Variable Definitions: 
+1. pitch_type: The type of pitch derived from Statcast.
+
+2. release_speed: Pitch velocities from 2008-16 are via Pitch F/X, and adjusted 
+to roughly out-of-hand release point. All velocities from 2017 and beyond are
+Statcast, which are reported out-of-hand.
+
+3. release_pos_x: Horizontal Release Position of the ball measured in feet
+from the catcher's perspective.
+
+4. release_pos_z: Vertical Release Position of the ball measured in feet from 
+the catcher's perspective.
+
+5. Zone: Zone location of the ball when it crosses the plate from 
+the catcher's perspective. (The strike zone is broken into 9 quadrants, top left,
+top middle, top right...continue for middle and low. Non 1-9 numbers are out of zone)
+
+6. stand: Side of the plate batter is standing.
+
+7. p_throws: Hand pitcher throws with.
+
+8. type: Short hand of pitch result. B = ball, S = strike, X = in play.
+
+9. pfx_x: Horizontal movement in feet from the catcher's perspective.
+
+10. pfx_z: Vertical movement in feet from the catcher's perpsective.
+
+11. plate_x: Horizontal position of the ball when it crosses home plate 
+from the catcher's perspective.
+
+12. plate_z
+Vertical position of the ball when it crosses home plate from the catcher's
+perspective.
+
+13. effective_speed: Derived speed based on the the extension of the pitcher's 
+release.
+
+14. release_spin: Spin rate of pitch tracked by Statcast.
+
+15. release_extension: Release extension of pitch in feet as tracked by Statcast.
+
+16. Pitcher: MLB Player Id tied to the play event.
+
+17. release_pos_y: Release position of pitch measured in feet from the catcher's
+perspective.
+
+18. estimated_ba_using_speedangle: Estimated Batting Avg based on launch 
+angle and exit velocity.
+
+19. estimated_woba_using_speedangle: Estimated wOBA based on launch angle and 
+exit velocity.
+
+20. pitch_name: The name of the pitch derived from the Statcast Data.
+
+21. spin_axis: The Spin Axis in the 2D X-Z plane in degrees from 0 to 360,
+such that 180 represents a pure backspin fastball and 0 degrees represents
+a pure topspin (12-6) curveball
+
+22. description: Description of the resulting pitch.
