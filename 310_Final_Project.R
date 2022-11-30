@@ -264,21 +264,29 @@ write.csv(SavantData22, "SavantPitchingData2022.csv", row.names = F)
 
 SavantData22 = read.csv("SavantPitchingData2022.csv", stringsAsFactors = F)
 
-variables_df <- SavantData22 %>% select(player_name, pitch_name, release_speed, 
+all_variables <- SavantData22 %>% select(player_name, pitch_name, release_speed, 
                                         release_pos_x, release_pos_z, description,
                                         zone, stand, p_throws, type, pfx_x, pfx_z,
                                         plate_x, plate_z, effective_speed, 
                                         release_spin_rate, release_extension,
                                         pitcher, release_pos_y, 
-                                        spin_axis)
+                                        spin_axis, estimated_woba_using_speedangle)
 
-names_change_df <- rename(variables_df, horiz_release = release_pos_x , 
+non_na_variables <- SavantData22 %>% select(player_name, pitch_name, release_speed, 
+                                            release_pos_x, release_pos_z, description,
+                                            zone, stand, p_throws, type, pfx_x, pfx_z,
+                                            plate_x, plate_z, effective_speed, 
+                                            release_spin_rate, release_extension,
+                                            pitcher, release_pos_y, 
+                                            spin_axis, estimated_woba_using_speedangle)
+
+names_change_df <- rename(all_variables, horiz_release = release_pos_x , 
                                            vert_release = release_pos_z , 
                                            dist_from_home = release_pos_y , 
                           batter_side = stand , pitcher_throws = p_throws , 
                           ball_strike_in_play = type , horiz_break = pfx_x ,
                           vert_break = pfx_z , horiz_pos = plate_x , 
-                          vert_pos = plate_z)
+                          vert_pos = plate_z, xWOBA = estimated_woba_using_speedangle)
 
 statcast_clean <- names_change_df %>% na.omit()
 
