@@ -1,0 +1,101 @@
+---
+title: "MGSC 310: Whiffs based on Pitch Type and Location"
+author: "Zachary Inn"
+subtitle:
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+
+# Please leave this code chunk as is. It makes some slight formatting changes to alter the output to be more aesthetically pleasing. 
+
+library(knitr)
+
+# Change the number in set seed to your own favorite number
+set.seed(1818)
+options(width=70)
+options(scipen=99)
+
+
+# this sets text outputted in code chunks to small
+opts_chunk$set(tidy.opts=list(width.wrap=50),tidy=TRUE, size = "vsmall")  
+opts_chunk$set(message = FALSE,                                          
+               warning = FALSE,
+               # "caching" stores objects in code chunks and only rewrites if you change things
+               cache = FALSE,                               
+               # automatically downloads dependency files
+               autodep = TRUE,
+               # 
+               cache.comments = FALSE,
+               # 
+               collapse = TRUE,
+               # change fig.width and fig.height to change the code height and width by default
+               fig.width = 5.5,  
+               fig.height = 4.5,
+               fig.align='center')
+
+
+```
+
+```{r setup-2}
+
+# Always print this out before your assignment
+sessionInfo()
+getwd()
+
+```
+
+
+<!-- ### start answering your problem set here -->
+<!-- You may export your homework in either html or pdf, with the former usually being easier. 
+     To export or compile your Rmd file: click above on 'Knit' then 'Knit to HTML' -->
+<!-- Be sure to submit both your .Rmd file and the compiled .html or .pdf file for full credit -->
+
+
+
+```{r}
+library('tidyverse')
+library('ggplot2')
+library('dplyr')
+savant <- read_csv("MGSC_310/datasets/SavantClean.csv")
+
+savant_clean <-
+  savant %>%
+  mutate(pitch_name =
+           fct_recode(pitch_name,
+                      "Fastball" = "4-Seam Fastball",
+                      "Fastball" = "Fastball",
+                      "Slider" = "Slider",
+                      "Curveball" = "Curveball",
+                      "Curveball" = "Knuckle Curve",
+                      "Sinker" = "sinker",
+                      "Cutter" = "Cutter",
+                      "Splitter" = "Split-Finger",
+                      "Changeup" = "Changeup",
+                      "Other" = "Eephus",
+                      "Other" = "Knuckleball"))
+
+savant_noother <-
+  savant_clean %>%
+  filter(pitch_name != "Other")
+
+topKzone = 3.5
+botKzone = 1.6
+inKzone = -.95
+outKzone = 0.95
+kZone = data.frame(
+  x = c(inKzone, inKzone, outKzone, outKzone, inKzone)
+  , y = c(botKzone, topKzone, topKzone, botKzone, botKzone)
+)
+
+ggplot() + 
+  geom_point(size = .5, data = savant_noother, aes(x=horiz_pos, y=vert_pos, color = whiff, alpha = .2)) +
+  geom_path(aes(x, y), color = "white", data = kZone) +
+  xlab("Horizontal Position of Ball in Feet") + ylab("Vertical Position of Ball in Feet") +
+  xlim(-3.75, 3.75) +
+  ylim(-2.5, 7.5) +
+  facet_wrap(facets = vars(pitch_name))
+```
