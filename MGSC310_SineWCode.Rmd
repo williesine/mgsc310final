@@ -1,0 +1,119 @@
+---
+title: "310 Final Code"
+author: "Willie Sine"
+date: "2022-11-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages('vtable')
+library(vtable)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+library(readr)
+library(rsample)
+library("purrr")
+library('plotROC')
+```
+
+
+## 310 Final Code Snippets
+
+
+```{r}
+df <- read.csv("Datasets/SavantClean.csv")
+
+```
+
+## Summary Table
+
+```{r}
+sumtable(df)
+```
+
+## Plot 1
+
+```{r}
+
+ggplot(df, aes(x = release_speed, y = release_spin_rate)) +
+  geom_point()
+
+```
+
+## Data Manipulation + Model for Logistic Regression
+
+
+```{r}
+
+df <- 
+  df %>%
+  mutate(pitch_name = as_factor(pitch_name)) %>%
+  mutate(pitch_name = fct_lump_n(pitch_name, n = 4))
+levels(df$pitch_name)
+
+df_split <- initial_split(df, prop = 0.75)
+df_train <- training(df_split)
+df_test <- testing(df_split)
+
+logit_mod <- glm(whiff ~ pitch_name + release_speed + zone + horiz_break
+                 + vert_break + release_spin_rate + dist_from_home,
+                 family = binomial,
+                 data = df_train)
+summary(logit_mod)
+exp(logit_mod$coefficients)
+```
+
+## Accuracy Metrics/Plots
+
+```{r}
+test_scores <- predict(logit_mod,
+                  type = "response",
+                  newdata = df_test)
+head(test_scores)
+
+train_scores <- predict(logit_mod,
+                        type = "response",
+                        newdata = df_train)
+head(train_scores)
+
+results_train <- tibble(
+ 'true_class' = as.numeric(df_train$whiff),
+  'prob_event' = train_scores
+)
+
+results_test <- tibble(
+  'true_class' = as.numeric(df_test$whiff),
+  'prob_event' = test_scores
+)
+
+train_p <- ggplot(results_train, 
+            aes(m = prob_event, d = true_class)) + 
+  geom_roc(labelsize = 3.5, 
+           cutoffs.at = 
+             c(0.9,0.8,0.7,0.5,0.3,0.2,0.1)) +
+  theme_minimal(base_size = 16) +
+  ggtitle("Train Set ROC AUC")
+
+test_p <- ggplot(results_test, 
+            aes(m = prob_event, d = true_class)) + 
+  geom_roc(labelsize = 3.5, 
+           cutoffs.at = 
+             c(0.9,0.8,0.7,0.5,0.3,0.2,0.1)) +
+  theme_minimal(base_size = 16) +
+  ggtitle("Test Set ROC AUC")
+
+plot(train_p)
+plot(test_p)
+
+print(calc_auc(test_p))
+print(calc_auc(train_p))
+
+
+```
+
+
+
+
+
