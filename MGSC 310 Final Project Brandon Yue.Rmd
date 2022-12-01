@@ -1,0 +1,157 @@
+---
+title: "MGSC 310 Project"
+output: html_document
+date: "2022-12-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+# install.packages('baseballr')
+# install.packages('devtools')
+library("baseballr")
+library("dplyr")
+library('devtools')
+# install_github("BillPetti/baseballr")
+library('rsample')
+library('glmnet')
+library('glmnetUtils')
+library('forcats')
+
+
+date1 = baseballr::scrape_statcast_savant(start_date = '2022-04-07',
+                                          end_date = '2022-04-17', 
+                                          player_type = 'pitcher')
+
+baseball <- read_csv("C:/Users/brand/Downloads/SavantClean.csv")
+summary(baseball)
+
+baseball_split <- initial_split(baseball, prop = .8)
+baseball_train <- training(baseball_split)
+baseball_test <- testing(baseball_split)
+
+
+ggplot(baseball, aes(x = whiff, y = vert_pos)) + geom_point()
+
+whiff_factor <- 
+  baseball %>% 
+  mutate(whiff_factor = 
+           as_factor(whiff))
+
+# ridge model
+ridge_mod <- cv.glmnet(whiff ~ vert_break + horiz_break + zone + pitch_name + release_speed + release_spin_rate
+                       + spin_axis,
+                       data = baseball_train,
+                       alpha = 0)
+plot(ridge_mod)
+
+coef(ridge_mod, 
+     s = ridge_mod$lambda.min) %>% 
+  round(3)
+
+
+# lasso model
+lasso_mod <- cv.glmnet(whiff ~ vert_break + horiz_break + zone + pitch_name + release_speed + release_spin_rate
+                       + spin_axis + batter_side,
+                       data = baseball_train,
+                       alpha = 1)
+plot(lasso_mod)
+
+coef(lasso_mod, 
+     s = lasso_mod$lambda.se) %>% 
+  round(3)
+
+
+
+rating_simple <- baseball %>%  mutate(pitch_name = fct_infreq(pitch_name))
+table(baseball$pitch_namebaseball$rating_simple)
+
+
+
+#ALL DATA
+ggplot(data = baseball, 
+       aes(x = fct_infreq(pitch_name))) +
+  geom_bar(stat = "count") +
+  coord_flip() +
+  xlab("Pitch Outcomes")
+
+#MARCUS STROMAN
+stroman <- baseball %>% filter(player_name == "Stroman, Marcus")
+glimpse(stroman)
+
+stroman_simple <- stroman %>%  mutate(pitch_name = fct_infreq(pitch_name))
+ggplot(data = stroman, 
+       aes(x = fct_infreq(pitch_name))) +
+  geom_bar(stat = "count") +
+  coord_flip() +
+  xlab("Pitch Outcomes")
+
+lasso_stroman <- cv.glmnet(whiff ~ vert_break + horiz_break + zone + pitch_name + release_speed + release_spin_rate
+                       + spin_axis + batter_side,
+                       data = stroman,
+                       alpha = 1)
+
+coef(lasso_stroman, 
+     s = lasso_stroman$lambda.min) %>% 
+  round(3)
+
+stroman %>%
+  ggplot(aes(x = release_speed, y = pitch_name, color = whiff)) + 
+  geom_point() + 
+  scale_color_viridis_c(option = "C") + 
+  labs(x = "Release Speed (MPH)", 
+       y = "Pitch Type", 
+       color = "description", 
+       title = "Marcus Stroman Pitch Types vs Release Speed", 
+       caption = "Data accessed via baseball savant")
+
+
+#JACOB DEGROM
+
+degrom <- baseball %>% filter(player_name == "deGrom, Jacob")
+glimpse(degrom)
+
+degrom_simple <- degrom %>%  mutate(pitch_name = fct_infreq(pitch_name))
+ggplot(data = degrom_simple, 
+       aes(x = fct_infreq(pitch_name))) +
+  geom_bar(stat = "count") +
+  coord_flip() +
+  xlab("Pitch Outcomes")
+
+lasso_degrom <- cv.glmnet(whiff ~ vert_break + horiz_break + zone + pitch_name + release_speed + release_spin_rate
+                           + spin_axis + batter_side,
+                           data = degrom,
+                           alpha = 1)
+
+coef(lasso_degrom, 
+     s = lasso_degrom$lambda.min) %>% 
+  round(3)
+
+degrom %>%
+  ggplot(aes(x = release_speed, y = pitch_name, color = whiff)) + 
+  geom_point() + 
+  scale_color_viridis_c(option = "C") + 
+  labs(x = "Release Speed (MPH)", 
+       y = "Pitch Type", 
+       color = "description", 
+       title = "Jacob deGrom Pitch Types vs Release Speed", 
+       caption = "Data accessed via baseball savant")
+
+
+#baseball_keys <- baseball %>%  select(player_name, release_speed)
+#glimpse(baseball_keys)
+ggplot(data = baseball_keys, 
+       aes(x = player_name)) +
+  geom_bar() +
+  coord_flip() +
+  xlab("Pitch Outcomes")
+```
+
